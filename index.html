@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Reality vs Imagination</title>
+    <!-- Get all the required libraries -->
+    <script src="https://unpkg.com/jspsych@8.2.2"></script>
+    <script src="https://unpkg.com/fabric@7.1.0/dist/index.min.js"></script>
+    
+    <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-button-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-slider-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-instructions@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-preload@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-animation@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-canvas-keyboard-response@1.1.3"></script>
+    <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
+
+    <script src="jspsych-psychophysics.js"></script>
+    
+    <script src="fabric.js"></script> 
+    <!-- Tutorial:  https://fabric5.fabricjs.com/fabric-intro-part-1#images -->
+
+    <link href="https://unpkg.com/jspsych@8.2.2/css/jspsych.css" rel="stylesheet" type="text/css" />  
+    
+  </head>
+  <body></body>
+  <script>
+
+    //Initialize jsPsysch
+    const jsPsych = initJsPsych({
+      on_finish: () => {jsPsych.data.displayData()}
+    });
+
+    // subject id
+    const subject_id = jsPsych.randomization.randomID(10);
+    const filename = `${subject_id}.csv`;
+
+    jsPsych.data.addProperties({participantID: filename});
+
+
+    // Experiment parameters
+    let dynamic_noise_duration = 2000 
+    let single_frame_duration = 100
+    let canvas_size = [250,250]
+
+    // let n_total_frames = Math.round(dynamic_noise_duration/single_frame_duration)
+    // let n_sets_of_noise_imgs = Math.ceil(n_total_frames/noise_imgs.length)
+
+
+    // Get noise images ready.
+    let noise_files = [];
+    let fabric_noise_imgs = []
+    for (let i=0; i<50; i++){
+        let img_src = 'imgs/rand_noise_'+i+'.png';
+
+        noise_files.push(img_src)
+
+        let Img = new Image();
+        Img.src = img_src;
+
+        let fabric_img = new fabric.Image(Img, {
+              left: 125,
+              top: 125,
+              width:canvas_size[0], height:canvas_size[1],
+              opacity: 1
+        })
+        fabric_noise_imgs.push(fabric_img)
+    } 
+    
+    // get gabors
+    let gabor_left_img = new Image();
+    gabor_left_img.src = 'imgs/gabor_left.png'
+
+    let gabor_right_img = new Image();
+    gabor_right_img.src = 'imgs/gabor_right.png'
+
+    let gabor_left_fabric_img = new fabric.Image(gabor_left_img, {left: canvas_size[0]/2, top: canvas_size[1]/2, width:canvas_size[0], height:canvas_size[1], opacity: 1 })
+    let gabor_right_fabric_img = new fabric.Image(gabor_right_img, {left: canvas_size[0]/2, top: canvas_size[1]/2, width:canvas_size[0], height:canvas_size[1], opacity: 1 })
+
+
+    const preload = {
+        type: jsPsychPreload,
+        images: [...noise_files, 'imgs/gabor_left.png', 'imgs/gabor_right.png']
+    }
+
+
+
+    function make_trial(gabor_tilt, gabor_opacity) {
+
+      let interval_ID 
+      let timestamp;
+      let delta_times = []
+      let gabor_fabric_img = (gabor_tilt == 'left') ? gabor_left_fabric_img : gabor_right_fabric_img
+
+      let canvas_noise_animation_fabric = {
+        type: jsPsychCanvasKeyboardResponse,
+        canvas_size: canvas_size,
+        trial_duration: dynamic_noise_duration*20,
+        stimulus: function (c) {
+
+          fabric_noise_imgs = jsPsych.randomization.shuffleNoRepeats(fabric_noise_imgs)
+          
+          // initialize canvas and timestamp
+          timestamp=performance.now()
+          let canvas = new fabric.StaticCanvas("jspsych-canvas-stimulus");
+          let nth_frame = 0
+
+          interval_ID = setInterval( () => {
+
+            gabor_fabric_img.opacity = gabor_opacity // set opacity of gabor
+
+            // clear canvas of all objects and show new frame 
+            canvas.remove(...canvas.getObjects()) 
+            canvas.add(fabric_noise_imgs[nth_frame]); nth_frame = (nth_frame + 1) % noise_files.length // show nth noise stim and increment index
+            canvas.add(gabor_fabric_img);
+            canvas.renderAll()
+
+            // register frame durations
+            delta_times.push(Math.round(performance.now()-timestamp))
+            timestamp=performance.now()
+          }, 
+          single_frame_duration);   
+        },      
+        choices: ['f', 'j'],
+
+        on_finish:(data) => { 
+          data.gabor_opacity = gabor_opacity
+          data.gabor_tilt = gabor_tilt
+          data.frame_times = delta_times
+          
+          clearInterval(interval_ID) }
+      } 
+
+      return canvas_noise_animation_fabric
+    }
+
+    let timeline = [preload, 
+          make_trial('left', 0.1   ),
+          make_trial('left', 0.15  ),
+          make_trial('right', 0.2  ),
+          make_trial('right', 0.25 ),
+   ]
+
+
+    jsPsych.run(timeline);        
+
+  </script>
+</html>
+
+
+
