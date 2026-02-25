@@ -124,8 +124,8 @@
           }, 
           single_frame_duration);   
         },      
-        choices: ['f', 'j'],
-
+        choices: ['ArrowLeft', 'ArrowDown', 'ArrowRight'],
+        prompt:'<div>What do you see?</div>',
         on_finish:(data) => { 
           data.gabor_opacity = gabor_opacity
           data.gabor_tilt = gabor_tilt
