@@ -31,6 +31,58 @@
     <link href="https://unpkg.com/jspsych@8.2.2/css/jspsych.css" rel="stylesheet" type="text/css" />  
     
     
+    <style> 
+        .jspsych-display-element {
+            font-size: 30px;
+        }
+        .jspsych-btn {
+            font-size: 30px;
+            border: 10px solid transparent;
+            border-radius: 16px;
+            color: #333;
+            background-color: #8ee86d8d;
+            border-color: #2f5920e9;
+            padding: 1px 10px;
+        }
+        .jspsych-slider::-webkit-slider-thumb {
+            border: 10px solid #2f5920e9;
+            height: 80px;
+            width: 80px;
+            border-radius: 40px;
+            background: #8ee86d8d;
+            margin-top: -20px;
+        }   
+        .jspsych-slider::-webkit-slider-runnable-track {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 60%;
+            height: 50px;
+            cursor: pointer;
+            background: #fff;
+            box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+            border-radius: 2px;
+            border: 5px solid #aaa;
+        }     
+
+        #jspsych-progressbar-container {
+            color: #000000e9;
+            border-bottom: 5px solid #2f5920e9;
+            background-color: #ffffff;
+        }
+
+        #jspsych-progressbar-container span {
+            font-size: 20px;
+            padding-right: 25px;
+        }
+
+        #jspsych-progressbar-outer {
+            background-color: #8ee86d8d;
+        }
+
+        #jspsych-progressbar-inner {
+            background-color: #2f5920e9;
+        }
+    </style>  
   </head>
   <body></body>
   <script>
@@ -38,7 +90,7 @@
     //Initialize jsPsysch
     const jsPsych = initJsPsych({
       on_finish: () => {
-        jsPsych.data.get().localSave('csv', filename)
+        // jsPsych.data.get().localSave('csv', filename)
         jsPsych.data.displayData()
       }
     });
@@ -131,7 +183,7 @@
           
           // initialize canvas and timestamp
           timestamp=performance.now()
-          let canvas = new fabric.StaticCanvas("jspsych-canvas-stimulus", {backgroundColor:'cyan', centeredScaling:true});
+          let canvas = new fabric.StaticCanvas("jspsych-canvas-stimulus", {backgroundColor:'white', centeredScaling:true});
           let nth_frame = 0
 
           // setup keyboard listener 
@@ -189,7 +241,7 @@
           
           // initialize canvas and timestamp
           timestamp=performance.now()
-          let canvas = new fabric.StaticCanvas("jspsych-canvas-stimulus", {backgroundColor:'cyan', centeredScaling:true});
+          let canvas = new fabric.StaticCanvas("jspsych-canvas-stimulus", {backgroundColor:'white', centeredScaling:true});
           let nth_frame = 0
 
           interval_ID = setInterval( () => {
@@ -275,13 +327,12 @@
           vividness_rating_mouse,
           make_noise_trial('left', 0, 2000),
           vividness_rating_mouse,
-          make_noise_trial('left', 0, 2000),
-          vividness_rating_mouse,
           instruction_speeded_responses,
           instruction_imagination,
-          make_RT_trial('left', 0.1, 5000),
+          make_RT_trial('left', 0.13, 5000),
           make_RT_trial('right',0.1, 5000),
-          make_RT_trial('right',0.1, 5000),
+          make_RT_trial('right',0.13, 5000),
+          make_RT_trial('left',0.1, 5000),
    ]
 
 
